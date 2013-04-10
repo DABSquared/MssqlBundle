@@ -1,20 +1,16 @@
 {
-    "name": "isoft/mssql-bundle",
+    "name": "dabsquared/mssql-bundle",
     "description": "Driver for work with MsSQL server",
     "authors": [
         {
-            "name": "Realestate"
-        },
-        {
-            "name": "Vitaly Zhloba",
-            "email": "vitaly.zhloba@gmail.com"
+            "name": "DABSquared"
         }
     ],
     "require": {},
     "autoload": {
         "psr-0": {
-            "Realestate\\MssqlBundle": ""
+            "DABSquared\\MssqlBundle": ""
         }
     },
-    "target-dir": "Realestate/MssqlBundle"
+    "target-dir": "DABSquared/MssqlBundle"
 }

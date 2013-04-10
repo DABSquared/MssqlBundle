@@ -9,21 +9,21 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Realestate\MssqlBundle;
+namespace DABSquared\MssqlBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Doctrine\DBAL\Types\Type;
 
-class RealestateMssqlBundle extends Bundle
+class DABSquaredMssqlBundle extends Bundle
 {
     public function boot()
     {
         // Register custom data types
         if(!Type::hasType('uniqueidentifier')) {
-            Type::addType('uniqueidentifier', 'Realestate\MssqlBundle\Types\UniqueidentifierType');
+            Type::addType('uniqueidentifier', 'DABSquared\MssqlBundle\Types\UniqueidentifierType');
         }
 
-        Type::overrideType('date', 'Realestate\MssqlBundle\Types\DateType');        
-        Type::overrideType('datetime', 'Realestate\MssqlBundle\Types\DateTimeType');
+        Type::overrideType('date', 'DABSquared\MssqlBundle\Types\DateType');
+        Type::overrideType('datetime', 'DABSquared\MssqlBundle\Types\DateTimeType');
     }
 }

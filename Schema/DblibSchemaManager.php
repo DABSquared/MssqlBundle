@@ -29,4 +29,96 @@ class DblibSchemaManager extends SQLServerSchemaManager
         }
         return parent::_getPortableTableColumnDefinition($tableColumn);
     }
+
+    protected function _getPortableSequenceDefinition($sequence)
+    {
+        return end($sequence);
+    }
+
+    public function createDatabase($name)
+    {
+        $query = "CREATE DATABASE $name";
+        if ($this->_conn->options['database_device']) {
+            $query.= ' ON '.$this->_conn->options['database_device'];
+            $query.= $this->_conn->options['database_size'] ? '=' .
+                $this->_conn->options['database_size'] : '';
+        }
+        return $this->_conn->standaloneQuery($query, null, true);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createSequence($seqName, $start = 1, $allocationSize = 1)
+    {
+        $seqcolName = 'seq_col';
+        $query = 'CREATE TABLE ' . $seqName . ' (' . $seqcolName .
+            ' INT PRIMARY KEY CLUSTERED IDENTITY(' . $start . ', 1) NOT NULL)';
+
+        $res = $this->_conn->exec($query);
+
+        if ($start == 1) {
+            return true;
+        }
+
+        try {
+            $query = 'SET IDENTITY_INSERT ' . $sequenceName . ' ON ' .
+                'INSERT INTO ' . $sequenceName . ' (' . $seqcolName . ') VALUES ( ' . $start . ')';
+            $res = $this->_conn->exec($query);
+        } catch (Exception $e) {
+            $result = $this->_conn->exec('DROP TABLE ' . $sequenceName);
+        }
+        return true;
+    }
+
+    /**
+     * lists all database sequences
+     *
+     * @param string|null $database
+     * @return array
+     */
+    public function listSequences($database = null)
+    {
+        $query = "SELECT name FROM sysobjects WHERE xtype = 'U'";
+        $tableNames = $this->_conn->fetchAll($query);
+
+        return array_map(array($this->_conn->formatter, 'fixSequenceName'), $tableNames);
+    }
+
+    /**
+     * lists table views
+     *
+     * @param string $table database table name
+     * @return array
+     */
+    public function listTableViews($table)
+    {
+        $keyName = 'INDEX_NAME';
+        $pkName = 'PK_NAME';
+        if ($this->_conn->getAttribute(Doctrine::ATTR_PORTABILITY) & Doctrine::PORTABILITY_FIX_CASE) {
+            if ($this->_conn->getAttribute(Doctrine::ATTR_FIELD_CASE) == CASE_LOWER) {
+                $keyName = strtolower($keyName);
+                $pkName = strtolower($pkName);
+            } else {
+                $keyName = strtoupper($keyName);
+                $pkName = strtoupper($pkName);
+            }
+        }
+        $table = $this->_conn->quote($table, 'text');
+        $query = 'EXEC sp_statistics @table_name = ' . $table;
+        $indexes = $this->_conn->fetchColumn($query, $keyName);
+
+        $query = 'EXEC sp_pkeys @table_name = ' . $table;
+        $pkAll = $this->_conn->fetchColumn($query, $pkName);
+
+        $result = array();
+
+        foreach ($indexes as $index) {
+            if ( ! in_array($index, $pkAll) && $index != null) {
+                $result[] = $this->_conn->formatter->fixIndexName($index);
+            }
+        }
+
+        return $result;
+    }
 }

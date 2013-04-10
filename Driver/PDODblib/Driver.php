@@ -10,8 +10,8 @@
  * @author Scott Morken <scott.morken@pcmail.maricopa.edu>
  */
 
-namespace Realestate\MssqlBundle\Driver\PDODblib;
-use Realestate\MssqlBundle\Platforms\DblibPlatform;
+namespace DABSquared\MssqlBundle\Driver\PDODblib;
+use DABSquared\MssqlBundle\Platforms\DblibPlatform;
 
 class Driver implements \Doctrine\DBAL\Driver
 {
