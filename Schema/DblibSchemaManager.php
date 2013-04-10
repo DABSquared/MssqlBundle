@@ -1,6 +1,6 @@
 <?php
 
-namespace Realestate\MssqlBundle\Schema;
+namespace DABSquared\MssqlBundle\Schema;
 
 use Doctrine\DBAL\Schema\SQLServerSchemaManager;
 
