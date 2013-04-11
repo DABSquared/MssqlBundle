@@ -62,11 +62,11 @@ class DblibSchemaManager extends SQLServerSchemaManager
         }
 
         try {
-            $query = 'SET IDENTITY_INSERT ' . $sequenceName . ' ON ' .
-                'INSERT INTO ' . $sequenceName . ' (' . $seqcolName . ') VALUES ( ' . $start . ')';
+            $query = 'SET IDENTITY_INSERT ' . $seqName . ' ON ' .
+                'INSERT INTO ' . $seqName . ' (' . $seqcolName . ') VALUES ( ' . $start . ')';
             $res = $this->_conn->exec($query);
         } catch (Exception $e) {
-            $result = $this->_conn->exec('DROP TABLE ' . $sequenceName);
+            $result = $this->_conn->exec('DROP TABLE ' . $seqName);
         }
         return true;
     }
