@@ -19,32 +19,33 @@ use Doctrine\DBAL\Types\ConversionException;
  */
 class DateType extends BaseDateType
 {
+    public function getName()
+    {
+        return Type::DATE;
+    }
+
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    {
+        return $platform->getDateTypeDeclarationSQL($fieldDeclaration);
+    }
+
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    {
+        return ($value !== null)
+            ? $value->format($platform->getDateFormatString()) : null;
+    }
+
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
         if ($value === null) {
             return null;
         }
 
-        if ($value === "") {
-            return null;
-        }
+        $val = \DABSquared\MssqlBundle\Types\DABSquaredDateTime::createFromFormat('!'.$platform->getDateFormatString(), $value);
 
-        $val = \DateTime::createFromFormat('Y-m-d', $value);
         if (!$val) {
-            throw ConversionException::conversionFailedFormat($value, $this->getName(), 'Y-m-d');
+            throw ConversionException::conversionFailedFormat($value, $this->getName(), $platform->getDateFormatString());
         }
-
         return $val;
-    }
-
-    /**
-     *
-     * @param \DateTime $value
-     * @param AbstractPlatform $platform
-     * @return string|null
-     */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
-    {
-        return ($value !== null) ? $value->format('Y-m-d') : null;
     }
 }

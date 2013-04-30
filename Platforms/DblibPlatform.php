@@ -127,23 +127,6 @@ class DblibPlatform extends SQLServer2008Platform
 
     /**
      * @override
-     */
-    protected function initializeDoctrineTypeMappings()
-    {
-        parent::initializeDoctrineTypeMappings();
-
-    }
-
-    /**
-     * @override
-     */
-    public function getDateTimeFormatString()
-    {
-        return 'Y-m-d H:i:s.u';
-    }
-
-    /**
-     * @override
      * @return bool
      */
     public function supportsLimitOffset()
