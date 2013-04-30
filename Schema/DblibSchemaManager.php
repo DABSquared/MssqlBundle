@@ -19,20 +19,54 @@ use Doctrine\DBAL\Schema\SQLServerSchemaManager;
 
 class DblibSchemaManager extends SQLServerSchemaManager
 {
-       /**
-     * @override
-     */
-    protected function _getPortableTableColumnDefinition($tableColumn) {
-        // ensure upper case keys are there too...
-        foreach ($tableColumn as $key => $value) {
-            $tableColumn[strtoupper($key)] = $value;
-        }
-        return parent::_getPortableTableColumnDefinition($tableColumn);
-    }
-
     protected function _getPortableSequenceDefinition($sequence)
     {
         return end($sequence);
+    }
+
+    protected function _getPortableTableForeignKeysList($tableForeignKeys)
+    {
+        $list = array();
+        foreach ($tableForeignKeys as $key => $value) {
+            $value = \array_change_key_case($value, CASE_LOWER);
+            if(array_key_exists('constraint_name', $value)){
+                                if (!isset($list[$value['constraint_name']])) {
+                                        if ($value['delete_rule'] == "NO ACTION") {
+                                              $value['delete_rule'] = null;
+                                            }
+
+                    $list[$value['pkconstraint_name']] = array(
+                            'name' => $value['pkconstraint_name'],
+                            'local' => array(),
+                            'foreign' => array(),
+                            'foreignTable' => $value['fktable_name'],
+                           'onDelete' => $value['delete_rule'],
+                        );
+                }
+
+                $list[$value['pkconstraint_name']] = array(
+                    'name' => $value['pkconstraint_name'],
+                    'local' => array(),
+                    'foreign' => array(),
+                    'foreignTable' => $value['fktable_name'],
+                    'onDelete' => $value['delete_rule'],
+                );
+                $list[$value['pkconstraint_name']]['local'][$value['deferrability']] = $value['pkcolumn_name'];
+                $list[$value['pkconstraint_name']]['foreign'][$value['deferrability']] = $value['fkcolumn_name'];
+            }
+
+        }
+
+        $result = array();
+        foreach($list AS $constraint) {
+            $result[] = new ForeignKeyConstraint(
+                array_values($constraint['local']), $constraint['foreignTable'],
+                array_values($constraint['foreign']),  $constraint['name'],
+                array('onDelete' => $constraint['onDelete'])
+            );
+        }
+
+        return $result;
     }
 
     public function createDatabase($name)
@@ -66,7 +100,7 @@ class DblibSchemaManager extends SQLServerSchemaManager
                 'INSERT INTO ' . $seqName . ' (' . $seqcolName . ') VALUES ( ' . $start . ')';
             $res = $this->_conn->exec($query);
         } catch (Exception $e) {
-            $result = $this->_conn->exec('DROP TABLE ' . $seqName);
+            $result = $this->_conn->exec('DROP TABLE ' . $sequenceName);
         }
         return true;
     }
@@ -88,7 +122,7 @@ class DblibSchemaManager extends SQLServerSchemaManager
     /**
      * lists table views
      *
-     * @param string $table database table name
+     * @param string $table     database table name
      * @return array
      */
     public function listTableViews($table)
@@ -98,10 +132,10 @@ class DblibSchemaManager extends SQLServerSchemaManager
         if ($this->_conn->getAttribute(Doctrine::ATTR_PORTABILITY) & Doctrine::PORTABILITY_FIX_CASE) {
             if ($this->_conn->getAttribute(Doctrine::ATTR_FIELD_CASE) == CASE_LOWER) {
                 $keyName = strtolower($keyName);
-                $pkName = strtolower($pkName);
+                $pkName  = strtolower($pkName);
             } else {
                 $keyName = strtoupper($keyName);
-                $pkName = strtoupper($pkName);
+                $pkName  = strtoupper($pkName);
             }
         }
         $table = $this->_conn->quote($table, 'text');
