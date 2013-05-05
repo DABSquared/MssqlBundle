@@ -25,7 +25,7 @@ use Doctrine\DBAL\DBALException,
     Doctrine\DBAL\Schema\TableDiff;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use Doctrine\DBAL\Platforms\SQLServer2012Platform;
+use Doctrine\DBAL\Platforms\SQLServer2008Platform;
 
 /**
  * The DblibPlatform provides the behavior, features and SQL dialect of the
@@ -36,7 +36,7 @@ use Doctrine\DBAL\Platforms\SQLServer2012Platform;
  * @author Roman Borschel <roman@code-factory.org>
  * @author Benjamin Eberlei <kontakt@beberlei.de>
  */
-class DblibPlatform extends SQLServer2012Platform
+class DblibPlatform extends SQLServer2008Platform
 {
     /**
      * Whether the platform supports transactions.
@@ -123,6 +123,16 @@ class DblibPlatform extends SQLServer2012Platform
     public function getName()
     {
         return 'mssql';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function initializeDoctrineTypeMappings()
+    {
+        parent::initializeDoctrineTypeMappings();
+        $this->doctrineTypeMapping['varbinary'] = 'varbinary';
+
     }
 
     /**
