@@ -22,7 +22,12 @@ class DABSquaredMssqlBundle extends Bundle
         if(!Type::hasType('uniqueidentifier')) {
             Type::addType('uniqueidentifier', 'DABSquared\MssqlBundle\Types\UniqueidentifierType');
         }
-        Type::addType('varbinary', 'DABSquared\MssqlBundle\Types\VarBinaryType');
+
+        if(Type::hasType('varbinary')) {
+            Type::overrideType('varbinary', 'DABSquared\MssqlBundle\Types\VarBinaryType');
+        } else {
+            Type::addType('varbinary', 'DABSquared\MssqlBundle\Types\VarBinaryType');
+        }
 
         Type::overrideType('date', 'DABSquared\MssqlBundle\Types\DateType');
         Type::overrideType('datetime', 'DABSquared\MssqlBundle\Types\DateTimeType');
